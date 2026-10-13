@@ -2,7 +2,6 @@ import { Hono } from 'hono'
 import { html } from 'hono/html'
 import type { Context } from 'hono'
 import { ContactService } from '../services/contact'
-import { notifyDiscord } from '../../../lib/discord'
 
 const publicRoutes = new Hono()
 
@@ -301,15 +300,6 @@ publicRoutes.post('/api/contact', async (c: any) => {
     delete data['cf-turnstile-response']
 
     await service.saveMessage(data)
-
-    // Aviso a Discord (best-effort): nunca altera la respuesta del formulario.
-    try {
-      const _p = String(data.name || '').trim().split(/\s+/).filter(Boolean)
-      const _nm = _p.length ? _p[0] + (_p[1] ? ' ' + _p[1].charAt(0) + '.' : '') : 'contacto'
-      notifyDiscord(c.env, 'leads',
-        `\u{1F4DD} Nuevo contacto \u2014 comiboxchiriqui.com \u00b7 ${_nm}`,
-        (c as any).executionCtx)
-    } catch { /* best-effort */ }
 
     return c.json({ 
       success: true, 
