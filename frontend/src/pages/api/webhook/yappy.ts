@@ -1,7 +1,7 @@
 export const prerender = false;
 import type { APIRoute } from 'astro';
 import { generateYappySignature } from '../../../utils/yappyCrypto';
-import { notifyDiscord } from '../../../lib/discord';
+import { notifyDiscord, execCtx } from '../../../lib/discord';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Aviso a Discord (best-effort): resultado de pago Yappy.
     try {
-      const _ctx = (locals as any)?.runtime?.ctx;
+      const _ctx = execCtx(locals);
       const _st = String(status || '').toUpperCase();
       if (_st === 'E') {
         const _t = Number(String(total ?? '').replace(/[^0-9.]/g, '') || 0);

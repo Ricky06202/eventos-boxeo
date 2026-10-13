@@ -50,3 +50,26 @@ export function notifyDiscord(
     /* best-effort */
   }
 }
+
+
+/**
+ * Devuelve el ExecutionContext de Cloudflare de forma SEGURA, sin romper el
+ * request. Astro v6 elimino locals.runtime.ctx (su getter lanza error) y lo
+ * reemplazo por locals.cfContext. En Astro v5 sigue existiendo runtime.ctx.
+ * Si no hay contexto disponible devuelve undefined (el aviso se dispara igual).
+ */
+export function execCtx(locals: any): any {
+  try {
+    const c = (locals as any)?.cfContext;
+    if (c && typeof c.waitUntil === 'function') return c;
+  } catch {
+    /* Astro v5/v6 differences: nunca romper */
+  }
+  try {
+    const c = (locals as any)?.runtime?.ctx;
+    if (c && typeof c.waitUntil === 'function') return c;
+  } catch {
+    /* noop */
+  }
+  return undefined;
+}
